@@ -44,15 +44,6 @@ jobs:
           username: ${{ env.GHCR_NAME }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-        with:
-          images: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/pundix
-            ghcr.io/${{ github.repository }}
-
       - name: Build and push Docker images
         uses: docker/build-push-action@v3
         with:
