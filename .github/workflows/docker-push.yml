@@ -1,0 +1,66 @@
+name: Publish Docker image
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+env:
+  GHCR_NAME: devon-chain
+
+jobs:
+  push_to_registries:
+    name: Push Docker image to multiple registries
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Get Github tag
+        id: meta
+        run: |
+          echo "::set-output name=tag::$(git describe --always --tags --match='v*' | sed -e 's/^v//')"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+      - name: Login to Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ env.GHCR_NAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+        with:
+          images: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/pundix
+            ghcr.io/${{ github.repository }}
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64, linux/arm64
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/pundix:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/pundix:${{ steps.meta.outputs.tag }}
+            ghcr.io/${{ env.GHCR_NAME }}/pundix:latest
+            ghcr.io/${{ env.GHCR_NAME }}/pundix:${{ steps.meta.outputs.tag }}
