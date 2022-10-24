@@ -5,9 +5,6 @@ on:
     tags:
       - "v*.*.*"
 
-env:
-  GHCR_NAME: devon-chain
-
 jobs:
   push_to_registries:
     name: Push Docker image to multiple registries
@@ -41,7 +38,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ env.GHCR_NAME }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker images
@@ -51,7 +48,7 @@ jobs:
           push: true
           platforms: linux/amd64, linux/arm64
           tags: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/pundix:latest
-            ${{ secrets.DOCKER_HUB_USERNAME }}/pundix:${{ steps.meta.outputs.tag }}
-            ghcr.io/${{ env.GHCR_NAME }}/pundix:latest
-            ghcr.io/${{ env.GHCR_NAME }}/pundix:${{ steps.meta.outputs.tag }}
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.repository.name }}:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ github.event.repository.name }}:${{ steps.meta.outputs.tag }}
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:latest
+            ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}:${{ steps.meta.outputs.tag }}
