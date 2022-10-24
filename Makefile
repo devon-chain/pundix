@@ -210,7 +210,7 @@ update-swagger-docs: proto-swagger-gen statik
 ###############################################################################
 
 PACKAGE_NAME:=github.com/pundix/pundix
-GOLANG_CROSS_VERSION  = v1.18
+GOLANG_CROSS_VERSION  = v1.19.2
 GOPATH ?= '$(HOME)/go'
 release-dry-run:
 	docker run \
